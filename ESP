@@ -1,3 +1,4 @@
+-- Initialize the Rexy table
 local Rexy = {}
 
 -- Default settings
@@ -7,21 +8,23 @@ Rexy.ESP = {
     Distance = true
 }
 
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local Camera = game:GetService("Workspace").CurrentCamera
+-- Create a table to store ESP elements
+local ESPComponents = {
+    Box = false,
+    Name = false,
+    Distance = false
+}
 
--- Helper function to draw a box around a character
+-- Helper functions to draw ESP components
 local function drawBox(character)
     local head = character:FindFirstChild("Head")
     if not head then return end
-    
-    local pos, onScreen = Camera:WorldToScreenPoint(head.Position)
+
+    local pos, onScreen = game.Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
     if onScreen then
-        local boxSize = Vector2.new(100, 100) -- Arbitrary size, scale accordingly
+        local boxSize = Vector2.new(100, 100)  -- Arbitrary size, adjust as needed
         local boxPos = Vector2.new(pos.X - boxSize.X / 2, pos.Y - boxSize.Y / 2)
 
-        -- Drawing the box (you can replace this with your GUI draw function)
         local box = Instance.new("Frame")
         box.Size = UDim2.new(0, boxSize.X, 0, boxSize.Y)
         box.Position = UDim2.new(0, boxPos.X, 0, boxPos.Y)
@@ -30,12 +33,11 @@ local function drawBox(character)
     end
 end
 
--- Helper function to display a name above the character
 local function drawName(character)
     local head = character:FindFirstChild("Head")
     if not head then return end
 
-    local pos, onScreen = Camera:WorldToScreenPoint(head.Position)
+    local pos, onScreen = game.Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
     if onScreen then
         local nameLabel = Instance.new("TextLabel")
         nameLabel.Text = character.Name
@@ -47,12 +49,11 @@ local function drawName(character)
     end
 end
 
--- Helper function to display distance from the player
 local function drawDistance(character, player)
     local head = character:FindFirstChild("Head")
     if not head then return end
 
-    local pos, onScreen = Camera:WorldToScreenPoint(head.Position)
+    local pos, onScreen = game.Workspace.CurrentCamera:WorldToScreenPoint(head.Position)
     if onScreen then
         local distance = (character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
         local distanceLabel = Instance.new("TextLabel")
@@ -65,10 +66,12 @@ local function drawDistance(character, player)
     end
 end
 
--- Main loop
+-- The function that runs every frame to update the ESP
 local function updateESP()
-    local player = Players.LocalPlayer
-    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+    local player = game.Players.LocalPlayer
+    if not player.Character then return end
+
+    for _, targetPlayer in ipairs(game.Players:GetPlayers()) do
         if targetPlayer ~= player and targetPlayer.Character then
             if Rexy.ESP.Box then
                 drawBox(targetPlayer.Character)
@@ -83,15 +86,23 @@ local function updateESP()
     end
 end
 
--- Continuous update of ESP
+-- Set up a continuous update loop using RunService
 game:GetService("RunService").Heartbeat:Connect(updateESP)
 
--- Allow toggling of ESP settings
-function Rexy.ToggleESP(component, state)
-    if Rexy.ESP[component] ~= nil then
-        Rexy.ESP[component] = state
-    end
-end
+-- Make the ESP components easily toggleable by adding them to the `Rexy.ESP` table
+setmetatable(Rexy.ESP, {
+    __index = function(_, key)
+        -- Default return is false if the key doesn't exist
+        return ESPComponents[key] or false
+    end,
 
--- Return the Rexy library for use
+    __newindex = function(_, key, value)
+        -- If a valid key is set (Box, Name, Distance), update the state
+        if ESPComponents[key] ~= nil then
+            ESPComponents[key] = value
+        end
+    end
+})
+
+-- Return the Rexy library
 return Rexy
