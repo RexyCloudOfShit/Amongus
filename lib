@@ -1,151 +1,113 @@
-local AmongusHook = {}
+local AmongusLib = {}
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
-function AmongusHook.new(type, properties)
-    local drawing = Drawing.new(type)
-    for property, value in pairs(properties) do
-        drawing[property] = value
+-- Function to create draggable UI
+local function makeDraggable(frame)
+    local dragToggle, dragStart, startPos
+    local function updateInput(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
-    return drawing
+    
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragToggle = false
+                end
+            end)
+        end
+    end)
+    
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            if dragToggle then updateInput(input) end
+        end
+    end)
 end
 
-function AmongusHook:CreateWindow(options)
-    local window = {
-        Title = options.Title or "",
-        Center = options.Center or false,
-        AutoShow = options.AutoShow or false,
-        TabPadding = options.TabPadding or 8,
-        MenuFadeTime = options.MenuFadeTime or 0.2,
-        Tabs = {},
-        ActiveTab = nil,
-    }
-
-    if window.Center then
-        -- Handle centering logic here
-    end
-
-    if window.AutoShow then
-        -- Handle auto-show logic here
-    end
-
-    function window:AddTab(name)
-        local tab = {
-            Name = name,
-            LeftGroupboxes = {},
-            RightGroupboxes = {},
-        }
-
-        function tab:AddLeftGroupbox(name)
-            local groupbox = {
-                Name = name,
-                Elements = {},
-            }
-
-            function groupbox:AddToggle(id, options)
-                local toggle = {
-                    Text = options.Text,
-                    Default = options.Default or false,
-                    Tooltip = options.Tooltip,
-                    Callback = options.Callback,
-                    Value = options.Default or false,
-                }
-
-                function toggle:SetValue(value)
-                    self.Value = value
-                    if self.Callback then
-                        self.Callback(value)
-                    end
-                end
-
-                table.insert(self.Elements, toggle)
-                return toggle
-            end
-
-            function groupbox:AddSlider(id, options)
-                local slider = {
-                    Text = options.Text,
-                    Default = options.Default or 1,
-                    Min = options.Min or 1,
-                    Max = options.Max or 100,
-                    Rounding = options.Rounding or 0,
-                    Compact = options.Compact or false,
-                    Callback = options.Callback,
-                    Value = options.Default or 1,
-                }
-
-                function slider:SetValue(value)
-                    self.Value = value
-                    if self.Callback then
-                        self.Callback(value)
-                    end
-                end
-
-                table.insert(self.Elements, slider)
-                return slider
-            end
-
-            function groupbox:AddLabel(text)
-                local label = {
-                    Text = text,
-                }
-
-                function label:AddColorPicker(id, options)
-                    local colorPicker = {
-                        Default = options.Default or Color3.new(1, 1, 1),
-                        Title = options.Title or "Color",
-                        Callback = options.Callback,
-                        Value = options.Default or Color3.new(1, 1, 1),
-                    }
-
-                    function colorPicker:SetValue(value)
-                        self.Value = value
-                        if self.Callback then
-                            self.Callback(value)
-                        end
-                    end
-
-                    return colorPicker
-                end
-
-                table.insert(self.Elements, label)
-                return label
-            end
-
-            function groupbox:AddDropdown(id, options)
-                local dropdown = {
-                    Values = options.Values or {},
-                    Default = options.Default or 1,
-                    Multi = options.Multi or false,
-                    Text = options.Text or "Dropdown",
-                    Callback = options.Callback,
-                    Value = options.Values[options.Default],
-                }
-
-                function dropdown:SetValue(value)
-                    self.Value = value
-                    if self.Callback then
-                        self.Callback(value)
-                    end
-                end
-
-                table.insert(self.Elements, dropdown)
-                return dropdown
-            end
-
-            table.insert(self.LeftGroupboxes, groupbox)
-            return groupbox
+-- Creating a window
+function AmongusLib:CreateWindow(options)
+    local ScreenGui = Instance.new("ScreenGui")
+    local Window = Instance.new("Frame")
+    
+    ScreenGui.Parent = game:GetService("CoreGui")
+    
+    Window.Size = UDim2.new(0, 400, 0, 300)
+    Window.Position = options.Center and UDim2.new(0.5, -200, 0.5, -150) or UDim2.new(0, 50, 0, 50)
+    Window.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Window.Parent = ScreenGui
+    
+    makeDraggable(Window)
+    
+    local WindowTable = { Container = Window }
+    
+    function WindowTable:AddTab(tabName)
+        local Tab = Instance.new("Frame")
+        Tab.Size = UDim2.new(1, 0, 1, 0)
+        Tab.BackgroundTransparency = 1
+        Tab.Parent = Window
+        
+        local TabTable = {}
+        
+        function TabTable:AddLeftGroupbox(title)
+            return self:AddGroupbox(title, true)
         end
-
-        function tab:AddRightGroupbox(name)
-            local groupbox = self:AddLeftGroupbox(name)
-            table.insert(self.RightGroupboxes, groupbox)
-            return groupbox
+        
+        function TabTable:AddRightGroupbox(title)
+            return self:AddGroupbox(title, false)
         end
-
-        table.insert(self.Tabs, tab)
-        return tab
+        
+        function TabTable:AddGroupbox(title, left)
+            local Groupbox = Instance.new("Frame")
+            Groupbox.Size = UDim2.new(0.5, -10, 0, 150)
+            Groupbox.Position = UDim2.new(left and 0 or 0.5, left and 5 or -5, 0, 10)
+            Groupbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            Groupbox.Parent = Tab
+            
+            local GroupboxTable = {}
+            
+            function GroupboxTable:AddToggle(name, data)
+                local Toggle = Instance.new("TextButton")
+                Toggle.Size = UDim2.new(1, -10, 0, 30)
+                Toggle.Text = data.Text
+                Toggle.Parent = Groupbox
+                Toggle.MouseButton1Click:Connect(function()
+                    data.Callback(not data.Default)
+                end)
+            end
+            
+            function GroupboxTable:AddSlider(name, data)
+                local Slider = Instance.new("TextButton")
+                Slider.Size = UDim2.new(1, -10, 0, 30)
+                Slider.Text = data.Text .. ": " .. data.Default
+                Slider.Parent = Groupbox
+                Slider.MouseButton1Click:Connect(function()
+                    data.Callback(data.Default)
+                end)
+            end
+            
+            function GroupboxTable:AddColorPicker(name, data)
+                local ColorPicker = Instance.new("TextButton")
+                ColorPicker.Size = UDim2.new(1, -10, 0, 30)
+                ColorPicker.Text = data.Title
+                ColorPicker.Parent = Groupbox
+                ColorPicker.MouseButton1Click:Connect(function()
+                    data.Callback(data.Default)
+                end)
+            end
+            
+            return GroupboxTable
+        end
+        
+        return TabTable
     end
-
-    return window
+    
+    return WindowTable
 end
 
-return AmongusHook
+return AmongusLib
