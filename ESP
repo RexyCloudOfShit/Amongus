@@ -1,8 +1,9 @@
-local Rexy = {}
-Rexy.ESP = {}
+-- Ensure Rexy is initialized properly
+local Rexy = _G.Rexy or {}  -- Use _G to safely access or create Rexy if it doesn't exist
+Rexy.ESP = Rexy.ESP or {}   -- Ensure Rexy.ESP table exists
 
 -- Table to hold the ESP objects
-Rexy.ESP.Objects = {}
+Rexy.ESP.Objects = Rexy.ESP.Objects or {}
 
 -- Default settings for ESP
 Rexy.ESP.Box = true
@@ -100,4 +101,5 @@ end
 -- Connect to RenderStepped to update ESP every frame
 game:GetService("RunService").RenderStepped:Connect(renderESP)
 
-return Rexy
+-- Finally, ensure the Rexy global variable is set so that other scripts can access it later
+_G.Rexy = Rexy
