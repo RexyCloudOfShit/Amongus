@@ -50,7 +50,7 @@ end
 if not isfolder("ESP") then makefolder("ESP") end
 if not isfolder("ESP/assets") then makefolder("ESP/assets") end
 if not isfile("ESP/assets/pepa.oh") then
-    writefile("ESP/assets/pepa.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/b002424ce8ca9de8848b0588ca444b5cd87fac2f/download%20(4).png"))
+    writefile("ESP/assets/pepa.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/download%20(4).png"))
 end
 if not isfile("ESP/assets/gorilla.oh") then
     writefile("ESP/assets/gorilla.oh", game:HttpGet("https://raw.githubusercontent.com/tatar0071/IonHub/main/Assets/gorilla.png"))
