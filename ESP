@@ -47,33 +47,13 @@ local Framework = {}; Framework.__index = Framework; do
 end
 
 -- Main
-if not isfolder("ESP") then makefolder("ESP") end
-if not isfolder("ESP/assets") then makefolder("ESP/assets") end
-if not isfile("ESP/assets/pepa.oh") then
-    writefile("ESP/assets/pepa.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/download%20(4).png"))
-end
-if not isfile("ESP/assets/gorilla.oh") then
-    writefile("ESP/assets/gorilla.oh", game:HttpGet("https://raw.githubusercontent.com/tatar0071/IonHub/main/Assets/gorilla.png"))
-end
-if not isfile("ESP/assets/saul_goodman.oh") then
-    writefile("ESP/assets/saul_goodman.oh", game:HttpGet("https://raw.githubusercontent.com/tatar0071/IonHub/main/Assets/saul_goodman.png"))
-end
-if not isfile("ESP/assets/peter_griffin.oh") then
-    writefile("ESP/assets/peter_griffin.oh", game:HttpGet("https://raw.githubusercontent.com/tatar0071/IonHub/main/Assets/peter_griffin.png"))
-end
-if not isfile("ESP/assets/john_herbert.oh") then
-    writefile("ESP/assets/john_herbert.oh", game:HttpGet("https://raw.githubusercontent.com/tatar0071/IonHub/main/Assets/john_herbert.png"))
-end
-if not isfile("ESP/assets/fortnite.oh") then
-    writefile("ESP/assets/fortnite.oh", game:HttpGet("https://raw.githubusercontent.com/tatar0071/IonHub/main/Assets/fortnite.png"))
+if not isfolder("Pepahook") then makefolder("Pepahook") end
+if not isfolder("Pepahook/assets") then makefolder("ESP/assets") end
+if not isfile("Pepahook/assets/pepa.oh") then
+    writefile("Pepahook/assets/pepa.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/download%20(4).png"))
 end
 local Images = {
-    Pepa = readfile("ESP/assets/pepa.oh"),
-    Gorilla = readfile("ESP/assets/gorilla.oh"),
-    ["Saul Goodman"] = readfile("ESP/assets/saul_goodman.oh"),
-    ["Peter Griffin"] = readfile("ESP/assets/peter_griffin.oh"),
-    ["John Herbert"] = readfile("ESP/assets/john_herbert.oh"),
-    ["Fortnite"] = readfile("ESP/assets/fortnite.oh")
+    Pepa = readfile("ESP/assets/pepa.oh")
 }
 
 local ESP; ESP = {
