@@ -1667,14 +1667,14 @@ function library:Init(key)
             else
                 On = false
             end
-            toggleButton.MouseButton1Click:Connect(function()
-                On = not On
-                local SizeOn = On and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
-                local Transparency = On and 0 or 1
-                TweenService:Create(toggleDesign, TweenTable["toggle_form"], {Size = SizeOn}):Play()
-                TweenService:Create(toggleDesign, TweenTable["toggle_form"], {BackgroundTransparency = Transparency}):Play()
-                callback(On)
-            end)
+toggleButton.MouseButton1Click:Connect(function()
+    On = not On
+    local SizeOn = On and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
+    local Transparency = On and 0 or 1
+    toggleDesign.Size = SizeOn -- Instant size update
+    toggleDesign.BackgroundTransparency = Transparency -- Instant transparency update
+    callback(On)
+end)
 
             local ToggleFunctions = {}
             function ToggleFunctions:Text(new)
