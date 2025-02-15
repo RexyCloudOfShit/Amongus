@@ -1,1 +1,73 @@
 
+local Rexy = { ESP = {} }
+
+-- Function to draw a box around a player
+function Rexy.ESP.DrawBox(player, color)
+    local character = player.Character
+    if not character then return end
+
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+
+    local screenPosition, onScreen = game.Workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position)
+
+    if onScreen then
+        local scale = 1 / (screenPosition.Z * math.tan(math.rad(game.Workspace.CurrentCamera.FieldOfView / 2)))
+        local width = head.Size.X * scale
+        local height = head.Size.Y * scale
+
+        local topLeft = Vector2.new(screenPosition.X - width / 2, screenPosition.Y - height / 2)
+        local bottomRight = Vector2.new(screenPosition.X + width / 2, screenPosition.Y + height / 2)
+
+        -- Draw the box
+        local box = Drawing.new("Square")
+        box.Visible = true
+        box.Color = color
+        box.Thickness = 2
+        box.Size = Vector2.new(bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y)
+        box.Position = topLeft
+
+        -- Store the box in the player's character for later removal
+        if not character:FindFirstChild("ESPBox") then
+            local espBox = Instance.new("Folder")
+            espBox.Name = "ESPBox"
+            espBox.Parent = character
+        end
+        box.Parent = character.ESPBox
+    end
+end
+
+-- Function to clear ESP boxes
+function Rexy.ESP.ClearBoxes(player)
+    local character = player.Character
+    if character and character:FindFirstChild("ESPBox") then
+        for _, box in pairs(character.ESPBox:GetChildren()) do
+            box:Remove()
+        end
+    end
+end
+
+-- Function to toggle ESP
+function Rexy.ESP.Toggle(value)
+    if value then
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                Rexy.ESP.DrawBox(player, Color3.new(1, 0, 0)) -- Red color for example
+            end
+        end
+    else
+        for _, player in pairs(game.Players:GetPlayers()) do
+            Rexy.ESP.ClearBoxes(player)
+        end
+    end
+end
+
+-- Example usage
+Rexy.ESP.Box = function(value)
+    Rexy.ESP.Toggle(value)
+end
+
+return Rexy
