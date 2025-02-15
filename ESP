@@ -1,73 +1,81 @@
+-- Create the Rexy table
+local Rexy = {}
+Rexy.ESP = {
+    Box = false,
+    Name = false,
+    Distance = false
+}
 
-local Rexy = { ESP = {} }
+-- Create a Drawings table to store ESP elements
+local Drawings = {}
+Drawings.Box = nil
+Drawings.Name = nil
+Drawings.Distance = nil
 
--- Function to draw a box around a player
-function Rexy.ESP.DrawBox(player, color)
-    local character = player.Character
-    if not character then return end
+-- Function to initialize or update the ESP settings for a player
+function Rexy.ESP.Update(player)
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+        return
+    end
 
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then return end
+    local hrp = player.Character.HumanoidRootPart
+    local screenPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
+    local distance = (hrp.Position - workspace.CurrentCamera.CFrame.p).Magnitude
 
-    local head = character:FindFirstChild("Head")
-    if not head then return end
-
-    local screenPosition, onScreen = game.Workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position)
-
-    if onScreen then
-        local scale = 1 / (screenPosition.Z * math.tan(math.rad(game.Workspace.CurrentCamera.FieldOfView / 2)))
-        local width = head.Size.X * scale
-        local height = head.Size.Y * scale
-
-        local topLeft = Vector2.new(screenPosition.X - width / 2, screenPosition.Y - height / 2)
-        local bottomRight = Vector2.new(screenPosition.X + width / 2, screenPosition.Y + height / 2)
-
-        -- Draw the box
-        local box = Drawing.new("Square")
-        box.Visible = true
-        box.Color = color
-        box.Thickness = 2
-        box.Size = Vector2.new(bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y)
-        box.Position = topLeft
-
-        -- Store the box in the player's character for later removal
-        if not character:FindFirstChild("ESPBox") then
-            local espBox = Instance.new("Folder")
-            espBox.Name = "ESPBox"
-            espBox.Parent = character
+    -- Box ESP
+    if Rexy.ESP.Box then
+        if not Drawings.Box then
+            Drawings.Box = Drawing.new("Square")
+            Drawings.Box.Thickness = 2
+            Drawings.Box.Color = Color3.fromRGB(255, 0, 0)
+            Drawings.Box.Filled = false
         end
-        box.Parent = character.ESPBox
+        Drawings.Box.Position = Vector2.new(screenPosition.X - 50, screenPosition.Y - 100)  -- Adjust as needed
+        Drawings.Box.Size = Vector2.new(100, 200) -- Adjust size based on player model
+        Drawings.Box.Visible = onScreen
+    elseif Drawings.Box then
+        Drawings.Box.Visible = false
+    end
+
+    -- Name ESP
+    if Rexy.ESP.Name then
+        if not Drawings.Name then
+            Drawings.Name = Drawing.new("Text")
+            Drawings.Name.Size = 14
+            Drawings.Name.Color = Color3.fromRGB(255, 255, 255)
+            Drawings.Name.Center = true
+            Drawings.Name.Outline = true
+        end
+        Drawings.Name.Position = Vector2.new(screenPosition.X, screenPosition.Y - 120) -- Adjust as needed
+        Drawings.Name.Text = player.Name
+        Drawings.Name.Visible = onScreen
+    elseif Drawings.Name then
+        Drawings.Name.Visible = false
+    end
+
+    -- Distance ESP
+    if Rexy.ESP.Distance then
+        if not Drawings.Distance then
+            Drawings.Distance = Drawing.new("Text")
+            Drawings.Distance.Size = 14
+            Drawings.Distance.Color = Color3.fromRGB(255, 255, 255)
+            Drawings.Distance.Center = true
+            Drawings.Distance.Outline = true
+        end
+        Drawings.Distance.Position = Vector2.new(screenPosition.X, screenPosition.Y - 140) -- Adjust as needed
+        Drawings.Distance.Text = string.format("%.2f studs", distance)
+        Drawings.Distance.Visible = onScreen
+    elseif Drawings.Distance then
+        Drawings.Distance.Visible = false
     end
 end
 
--- Function to clear ESP boxes
-function Rexy.ESP.ClearBoxes(player)
-    local character = player.Character
-    if character and character:FindFirstChild("ESPBox") then
-        for _, box in pairs(character.ESPBox:GetChildren()) do
-            box:Remove()
-        end
+-- Main loop to update ESP for all players in the game
+game:GetService("RunService").RenderStepped:Connect(function()
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        Rexy.ESP.Update(player)
     end
-end
+end)
 
--- Function to toggle ESP
-function Rexy.ESP.Toggle(value)
-    if value then
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                Rexy.ESP.DrawBox(player, Color3.new(1, 0, 0)) -- Red color for example
-            end
-        end
-    else
-        for _, player in pairs(game.Players:GetPlayers()) do
-            Rexy.ESP.ClearBoxes(player)
-        end
-    end
-end
-
--- Example usage
-Rexy.ESP.Box = function(value)
-    Rexy.ESP.Toggle(value)
-end
-
+-- Return the Rexy table so it's accessible from outside
 return Rexy
