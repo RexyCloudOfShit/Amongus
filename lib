@@ -89,6 +89,7 @@ function AmongusLib:CreateWindow(options)
                     ColorPicker.MouseButton1Click:Connect(function()
                         data.Callback(data.Default)
                     end)
+                    return ColorPicker
                 end
                 
                 return LabelTable
