@@ -52,8 +52,20 @@ if not isfolder("Pepahook/assets") then makefolder("ESP/assets") end
 if not isfile("Pepahook/assets/pepa.oh") then
     writefile("Pepahook/assets/pepa.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/download%20(4).png"))
 end
+if not isfile("Pepahook/assets/daddy.oh") then
+    writefile("Pepahook/assets/daddy.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/daddy.png"))
+end
+if not isfile("Pepahook/assets/mommy.oh") then
+    writefile("Pepahook/assets/mommy.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/Mommy.png"))
+end
+if not isfile("Pepahook/assets/potato.oh") then
+    writefile("Pepahook/assets/potato.oh", game:HttpGet("https://raw.githubusercontent.com/RexyCloudOfShit/PepaHook/refs/heads/main/potato.png"))
+end
 local Images = {
     Pepa = readfile("ESP/assets/pepa.oh")
+    Daddy = readfile("ESP/assets/daddy.oh")
+    Mommy = readfile("ESP/assets/mommy.oh")
+    Potato = readfile("ESP/assets/potato.oh")
 }
 
 local ESP; ESP = {
