@@ -1,81 +1,97 @@
--- Create the Rexy table
 local Rexy = {}
+
+-- Default settings
 Rexy.ESP = {
-    Box = false,
-    Name = false,
-    Distance = false
+    Box = true,
+    Name = true,
+    Distance = true
 }
 
--- Create a Drawings table to store ESP elements
-local Drawings = {}
-Drawings.Box = nil
-Drawings.Name = nil
-Drawings.Distance = nil
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local Camera = game:GetService("Workspace").CurrentCamera
 
--- Function to initialize or update the ESP settings for a player
-function Rexy.ESP.Update(player)
-    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-        return
-    end
+-- Helper function to draw a box around a character
+local function drawBox(character)
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+    
+    local pos, onScreen = Camera:WorldToScreenPoint(head.Position)
+    if onScreen then
+        local boxSize = Vector2.new(100, 100) -- Arbitrary size, scale accordingly
+        local boxPos = Vector2.new(pos.X - boxSize.X / 2, pos.Y - boxSize.Y / 2)
 
-    local hrp = player.Character.HumanoidRootPart
-    local screenPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(hrp.Position)
-    local distance = (hrp.Position - workspace.CurrentCamera.CFrame.p).Magnitude
-
-    -- Box ESP
-    if Rexy.ESP.Box then
-        if not Drawings.Box then
-            Drawings.Box = Drawing.new("Square")
-            Drawings.Box.Thickness = 2
-            Drawings.Box.Color = Color3.fromRGB(255, 0, 0)
-            Drawings.Box.Filled = false
-        end
-        Drawings.Box.Position = Vector2.new(screenPosition.X - 50, screenPosition.Y - 100)  -- Adjust as needed
-        Drawings.Box.Size = Vector2.new(100, 200) -- Adjust size based on player model
-        Drawings.Box.Visible = onScreen
-    elseif Drawings.Box then
-        Drawings.Box.Visible = false
-    end
-
-    -- Name ESP
-    if Rexy.ESP.Name then
-        if not Drawings.Name then
-            Drawings.Name = Drawing.new("Text")
-            Drawings.Name.Size = 14
-            Drawings.Name.Color = Color3.fromRGB(255, 255, 255)
-            Drawings.Name.Center = true
-            Drawings.Name.Outline = true
-        end
-        Drawings.Name.Position = Vector2.new(screenPosition.X, screenPosition.Y - 120) -- Adjust as needed
-        Drawings.Name.Text = player.Name
-        Drawings.Name.Visible = onScreen
-    elseif Drawings.Name then
-        Drawings.Name.Visible = false
-    end
-
-    -- Distance ESP
-    if Rexy.ESP.Distance then
-        if not Drawings.Distance then
-            Drawings.Distance = Drawing.new("Text")
-            Drawings.Distance.Size = 14
-            Drawings.Distance.Color = Color3.fromRGB(255, 255, 255)
-            Drawings.Distance.Center = true
-            Drawings.Distance.Outline = true
-        end
-        Drawings.Distance.Position = Vector2.new(screenPosition.X, screenPosition.Y - 140) -- Adjust as needed
-        Drawings.Distance.Text = string.format("%.2f studs", distance)
-        Drawings.Distance.Visible = onScreen
-    elseif Drawings.Distance then
-        Drawings.Distance.Visible = false
+        -- Drawing the box (you can replace this with your GUI draw function)
+        local box = Instance.new("Frame")
+        box.Size = UDim2.new(0, boxSize.X, 0, boxSize.Y)
+        box.Position = UDim2.new(0, boxPos.X, 0, boxPos.Y)
+        box.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        box.Parent = game:GetService("CoreGui")
     end
 end
 
--- Main loop to update ESP for all players in the game
-game:GetService("RunService").RenderStepped:Connect(function()
-    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-        Rexy.ESP.Update(player)
-    end
-end)
+-- Helper function to display a name above the character
+local function drawName(character)
+    local head = character:FindFirstChild("Head")
+    if not head then return end
 
--- Return the Rexy table so it's accessible from outside
+    local pos, onScreen = Camera:WorldToScreenPoint(head.Position)
+    if onScreen then
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Text = character.Name
+        nameLabel.Position = UDim2.new(0, pos.X, 0, pos.Y)
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.TextSize = 14
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Parent = game:GetService("CoreGui")
+    end
+end
+
+-- Helper function to display distance from the player
+local function drawDistance(character, player)
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+
+    local pos, onScreen = Camera:WorldToScreenPoint(head.Position)
+    if onScreen then
+        local distance = (character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
+        local distanceLabel = Instance.new("TextLabel")
+        distanceLabel.Text = math.floor(distance) .. " studs"
+        distanceLabel.Position = UDim2.new(0, pos.X, 0, pos.Y + 20)
+        distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        distanceLabel.TextSize = 14
+        distanceLabel.BackgroundTransparency = 1
+        distanceLabel.Parent = game:GetService("CoreGui")
+    end
+end
+
+-- Main loop
+local function updateESP()
+    local player = Players.LocalPlayer
+    for _, targetPlayer in ipairs(Players:GetPlayers()) do
+        if targetPlayer ~= player and targetPlayer.Character then
+            if Rexy.ESP.Box then
+                drawBox(targetPlayer.Character)
+            end
+            if Rexy.ESP.Name then
+                drawName(targetPlayer.Character)
+            end
+            if Rexy.ESP.Distance then
+                drawDistance(targetPlayer.Character, player)
+            end
+        end
+    end
+end
+
+-- Continuous update of ESP
+game:GetService("RunService").Heartbeat:Connect(updateESP)
+
+-- Allow toggling of ESP settings
+function Rexy.ToggleESP(component, state)
+    if Rexy.ESP[component] ~= nil then
+        Rexy.ESP[component] = state
+    end
+end
+
+-- Return the Rexy library for use
 return Rexy
