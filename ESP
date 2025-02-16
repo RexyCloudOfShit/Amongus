@@ -706,6 +706,5 @@ do -- ESP Functions
         return Object
     end
 end
-end)
 
 return ESP, Connection, Framework
