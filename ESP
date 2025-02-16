@@ -64,10 +64,10 @@ if not isfile("Pepahook/assets/potato.oh") then
 end
 
 local Images = {
-    Pepa = readfile("ESP/assets/pepa.oh"),
-    Mommy = readfile("ESP/assets/mommy.oh"),
-    Daddy = readfile("ESP/assets/daddy.oh"),
-    Potato = readfile("ESP/assets/potato.oh"),
+    Pepa = readfile("Pepahook/assets/pepa.oh"),
+    Mommy = readfile("Pepahook/assets/mommy.oh"),
+    Daddy = readfile("Pepahook/assets/daddy.oh"),
+    Potato = readfile("Pepahook/assets/potato.oh"),
 }
 
 local ESP; ESP = {
