@@ -65,9 +65,6 @@ end
 
 local Images = {
     Pepa = readfile("Pepahook/assets/pepa.oh"),
-    Mommy = readfile("Pepahook/assets/mommy.oh"),
-    Daddy = readfile("Pepahook/assets/daddy.oh"),
-    Potato = readfile("Pepahook/assets/potato.oh"),
 }
 
 local ESP; ESP = {
